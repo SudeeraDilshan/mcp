@@ -100,7 +100,7 @@ async def update_customer(customer_id: int, name: str = None, email: str = None,
     try:
         async with pool.acquire() as conn:
             # Get current values
-            current = await conn.fetchrow("SELECT name, email, age, prefer_package FROM customers WHERE id = $1", customer_id)
+            current = await conn.fetchrow("SELECT id,name, email, age, prefer_package FROM customers WHERE id = $1", customer_id)
             if not current:
                 return None
             
@@ -111,7 +111,7 @@ async def update_customer(customer_id: int, name: str = None, email: str = None,
             new_prefer_package = prefer_package if prefer_package is not None else current['prefer_package']
             
             row = await conn.fetchrow(
-                "UPDATE customers SET name = $1, email = $2, age = $3 WHERE id = $4 RETURNING *",
+                "UPDATE customers SET name = $1, email = $2, age = $3, prefer_package = $5 WHERE id = $4 RETURNING *",
                 new_name, new_email, new_age, customer_id, new_prefer_package
             )
             return dict(row) if row else None
